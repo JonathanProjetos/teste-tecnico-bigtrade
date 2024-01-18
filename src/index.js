@@ -1,12 +1,17 @@
 const express = require('express');
 require("express-async-errors");
 const { connectToDataBase } = require('./config/connection');
+const useRouter = require('./router/user/UserRouter');
+const loginRouter = require('./router/auth/LoginRouter');
 
 const app = express();
 
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+
+app.use('/', loginRouter)
+app.use('/', useRouter);
 
 app.use((err, _req, res, _next) => {
   if (err.message.split('').includes('|')) {
