@@ -1,11 +1,12 @@
-import express from 'express';
+const express = require('express');
+require("express-async-errors");
+const { connectToDataBase } = require('./config/connection');
 
 const app = express();
 
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-
 
 app.use((err, _req, res, _next) => {
   if (err.message.split('').includes('|')) {
@@ -19,8 +20,13 @@ app.use((err, _req, res, _next) => {
   
 });
 
-const server = app.listen(PORT, () => console.log(
-  `Server is running on PORT: ${PORT}`,
-));
-
-export default server;
+connectToDataBase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+  });
+}).catch((err) => {
+  console.log('Erro ao conectar ao banco de dados err:\r\n');
+  console.error(err);
+  console.log('\r\nInicialização do servidor foi cancelada');
+  process.exit(0);
+});
