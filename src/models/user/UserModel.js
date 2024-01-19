@@ -1,15 +1,6 @@
-const { Schema, connection } = require('mongoose');
-const autoIncremente = require('mongoose-auto-increment');
-
-autoIncremente.initialize(connection);
+const { model, Schema } = require('mongoose');
 
 const userSchema = new Schema({
-  id: {
-    type: Number, 
-    ref: 'User',
-    required: true,
-    unique: true
-  },
   displayName: {
     type: String,
     required: true
@@ -28,13 +19,6 @@ const userSchema = new Schema({
   versionKey: false
 });
 
-userSchema.plugin(autoIncremente.plugin, {
-  model: 'User',
-  field: 'id',
-  startAt: 1,
-  incrementBy: 1
-})
-
-const User = connection.model('User', userSchema);
+const User = model('User', userSchema);
 
 module.exports = User;
