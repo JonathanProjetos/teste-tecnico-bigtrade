@@ -12,15 +12,6 @@ const UserServices = {
     // Busco os dados pelo email no banco de dados
     const user = await userModel.findOne({ email: check.email });
 
-    const users = await userModel.find();
-
-    // Verifico se o id já existe no banco de dados
-    if(users.length !== 0) {
-      users.forEach((i) => {
-        if(i.id === check.id) throw new Error('409|user already registered');
-      });
-    }
-
     // Verifico se o email já existe
     if (user) throw new Error('409|user already registered');
 
@@ -34,11 +25,69 @@ const UserServices = {
       password 
     });
 
-    // Personalizo a query para ocultar o campo _id
-    const newUserWithoutId = await userModel.findById(newUser._id).select('-_id').lean();
-
-    return newUserWithoutId;
+    return newUser;
   },
+
+  updateUser: async (body, id, email) => {
+
+    // Valido o corpo da requisição
+    const check = joiUser(body);
+
+    //Se o email provido pelo token não existir, lança um erro
+    if(!email) throw new Error('401|Unauthorized');
+
+    // Busco os dados pelo email no banco de dados
+    const user = await userModel.findOne({ email });
+    
+    if(!user) throw new Error('404|User not found');
+    
+    // Verifico se o email passado já está cadastrado
+    const isEmail = (await userModel.find()).some((user) => user.email === check.email);
+    
+    // Verifico se o email já existe
+    if (isEmail) throw new Error('409|user already registered');
+
+    // Criptografo a senha
+    const password = encrypt(check.password);
+
+    // Atualizo o usuário no banco de dados
+    const updateUser = await userModel.findByIdAndUpdate(
+      { _id: id },
+      { $set: { 
+        displayName: check.displayName,
+        email: check.email,
+        password 
+      }},
+      { new: true }
+    );
+
+    return updateUser;
+  },
+  
+  getUserById: async (id) => {
+    const result = await userModel.findById(id);
+    if(!result) throw new Error('404|User not found');
+    return result;
+  },
+
+  deleteUser: async (email, id) => {
+
+    //Se o email provido pelo token não existir, lança um erro
+    if(!email) throw new Error('401|Unauthorized');
+
+    //Se o id não existir, lança um erro
+    if(!id) throw new Error('404|User not found');
+
+    // Busco os dados pelo email no banco de dados
+    const user = await userModel.findOne({ email });
+    if(!user) throw new Error('404|User not found');
+ 
+    // Verifico se a pessoa que está tentando deletar o usuário é a mesma que está logada
+    if (user.id !== id) throw new Error('401|Unauthorized');
+
+    const result = await userModel.findByIdAndDelete({ _id: id }, { new: true });
+    return result;
+  }
 
 }
 
