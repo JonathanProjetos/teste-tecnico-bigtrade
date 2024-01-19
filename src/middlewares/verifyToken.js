@@ -5,7 +5,6 @@ module.exports = {
   verifyToken: (req, _res, next) => {
     try {
       const { authorization } = req.headers;
-      console.log(authorization);
       const filterBearerSwagger = authorization.split(' ').pop('Bearer');
       const dados = token.validateToken(filterBearerSwagger);
       req.email = dados.email;
