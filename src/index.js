@@ -1,8 +1,12 @@
 const express = require('express');
 require("express-async-errors");
-const { connectToDataBase } = require('./config/connection');
+const connectToDataBase = require('./config/connection');
 const useRouter = require('./router/user/UserRouter');
 const loginRouter = require('./router/auth/LoginRouter');
+const postRouter = require('./router/post/PostRouter');
+const swagger = require('swagger-ui-express');
+const swaggerDocument = require('./docs/swagger.json');
+
 
 const app = express();
 
@@ -10,8 +14,11 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-app.use('/', loginRouter)
+app.use('/doc', swagger.serve, swagger.setup(swaggerDocument));
+app.use('/', loginRouter);
 app.use('/', useRouter);
+app.use('/', postRouter);
+
 
 app.use((err, _req, res, _next) => {
   if (err.message.split('').includes('|')) {
