@@ -9,13 +9,9 @@ const PostService = {
 
     //Se o email provido pelo token não existir, lança um erro
     if(!email) throw new Error('401|Unauthorized');
-
-    console.log(email);
     
     // Busco o dado do usuário através do email provido pelo token
     const user = await userModel.findOne({ email });
-
-    console.log(user);
 
     // Verifico se o usuário existe
     if(!user) throw new Error('404|User not found');
